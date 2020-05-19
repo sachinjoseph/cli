@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 
-	"github.com/cli/cli/internal/config"
 	"github.com/cli/cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -34,6 +33,11 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	aliasCfg, err := cfg.Aliases()
+	if err != nil {
+		return err
+	}
+
 	alias := args[0]
 
 	out := colorableOut(cmd)
@@ -42,7 +46,7 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 
 	fmt.Fprintf(out, "- Adding alias for %s = %s\n", utils.Bold(alias), utils.Bold(expansion))
 
-	if aliasExists(cfg, alias) {
+	if aliasCfg.Exists(alias) {
 		return fmt.Errorf("alias %s already exists", alias)
 	}
 
@@ -52,19 +56,12 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 
 	// TODO set the alias on disk, probably going through config
 
-	fmt.Printf("%#v\n", ctx)
-
 	return nil
 }
 
 func validCommand(expansion string) bool {
 	// TODO
 	return false
-}
-
-func aliasExists(cfg config.Config, alias string) bool {
-	// TODO
-	return true
 }
 
 func processArgs(args []string) string {

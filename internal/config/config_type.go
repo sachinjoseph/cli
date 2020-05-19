@@ -15,6 +15,7 @@ type Config interface {
 	Hosts() ([]*HostConfig, error)
 	Get(string, string) (string, error)
 	Set(string, string, string) error
+	Aliases() (*AliasConfig, error)
 	Write() error
 }
 
@@ -32,6 +33,10 @@ type HostConfig struct {
 // comments that were present when the yaml waas parsed.
 type ConfigMap struct {
 	Root *yaml.Node
+}
+
+func (cm *ConfigMap) Empty() bool {
+	return cm.Root == nil || len(cm.Root.Content) == 0
 }
 
 func (cm *ConfigMap) GetStringValue(key string) (string, error) {
@@ -165,6 +170,34 @@ func (c *fileConfig) Write() error {
 	}
 
 	return WriteConfigFile(ConfigFile(), marshalled)
+}
+
+func (c *fileConfig) Aliases() (*AliasConfig, error) {
+	_, aliasesEntry, err := c.FindEntry("aliases")
+	var nfe *NotFoundError
+	if err != nil && errors.As(err, &nfe) {
+		// TODO does this make sense at all? want to simulate existing but empty key.
+		return &AliasConfig{}, nil
+	}
+
+	aliasConfig, err := c.parseAliasConfig(aliasesEntry)
+	if err != nil {
+		return nil, err
+	}
+
+	return aliasConfig, nil
+}
+
+func (c *fileConfig) parseAliasConfig(aliasesEntry *yaml.Node) (*AliasConfig, error) {
+	if aliasesEntry.Kind != yaml.MappingNode {
+		return nil, errors.New("expected aliases to be a map")
+	}
+
+	aliasConfig := AliasConfig{
+		ConfigMap: ConfigMap{Root: aliasesEntry},
+	}
+
+	return &aliasConfig, nil
 }
 
 func (c *fileConfig) Hosts() ([]*HostConfig, error) {

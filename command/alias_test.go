@@ -7,15 +7,23 @@ import (
 )
 
 func TestAliasSet_existing_alias(t *testing.T) {
-	initBlankContext("", "OWNER/REPO", "trunk")
-
-	// TODO setup
+	cfg := `---
+hosts:
+  github.com:
+    user: OWNER
+    oauth_token: token123
+aliases:
+  co: pr checkout
+`
+	initBlankContext(cfg, "OWNER/REPO", "trunk")
 
 	_, err := RunCommand("alias set co pr checkout")
 
 	if err == nil {
 		t.Fatal("expected error")
 	}
+
+	eq(t, err.Error(), "alias co already exists")
 }
 
 func TestAliasSet_arg_processing(t *testing.T) {
@@ -35,6 +43,5 @@ func TestAliasSet_arg_processing(t *testing.T) {
 		}
 
 		test.ExpectLines(t, output.String(), c.ExpectedLine)
-
 	}
 }
