@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cli/cli/utils"
 	"github.com/spf13/cobra"
@@ -42,7 +43,7 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 
 	out := colorableOut(cmd)
 
-	expansion := processArgs(args)
+	expansion := processArgs(args[1:])
 
 	fmt.Fprintf(out, "- Adding alias for %s = %s\n", utils.Bold(alias), utils.Bold(expansion))
 
@@ -61,10 +62,13 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 
 func validCommand(expansion string) bool {
 	// TODO
-	return false
+	return true
 }
 
 func processArgs(args []string) string {
-	// TODO
-	return "lol pbbbbt"
+	if len(args) == 1 {
+		return args[0]
+	}
+
+	return strings.Join(args, " ")
 }
