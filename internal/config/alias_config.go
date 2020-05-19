@@ -28,9 +28,17 @@ func (a *AliasConfig) Get(alias string) string {
 }
 
 func (a *AliasConfig) Add(alias, expansion string) error {
-	if a.Empty() {
+	if a.Root == nil {
+		// a.Root = initAliasConfig() // something like this?
+		// TODO create mapping node
 		// TODO initialize aliases key in config
 	}
+
+	// TODO add k/v nodes
+	// TODO write config
+
+	// TODO how to do all of this without reference to parent?
+
 	return nil
 }
 

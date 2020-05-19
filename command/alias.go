@@ -55,7 +55,12 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not create alias: %s does not correspond to a gh command", utils.Bold(expansion))
 	}
 
-	// TODO set the alias on disk, probably going through config
+	err = aliasCfg.Add(alias, expansion)
+	if err != nil {
+		return fmt.Errorf("could not create alias: %s", err)
+	}
+
+	fmt.Fprintf(out, "%s Added alias.", utils.Green("✓"))
 
 	return nil
 }
