@@ -43,6 +43,6 @@ func (a *AliasConfig) Add(alias, expansion string) error {
 }
 
 func (a *AliasConfig) Delete(alias string) error {
-	// TODO
+	// TODO when we get to gh alias delete
 	return nil
 }
