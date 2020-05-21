@@ -36,9 +36,13 @@ func main() {
 		panic("oh no")
 	}
 	aliases, err := cfg.Aliases()
+	if err != nil {
+		panic("ohh noo")
+	}
+
 	if aliases.Exists(os.Args[1]) {
 		expansion := aliases.Get(os.Args[1])
-		if strings.Index(expansion, "$") > -1 {
+		if strings.Contains(expansion, "$") {
 			for i, a := range os.Args[2:] {
 				expansion = strings.Replace(expansion, fmt.Sprintf("$%d", i+1), a, 1)
 			}
