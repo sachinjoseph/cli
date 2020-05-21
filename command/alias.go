@@ -47,7 +47,7 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 
 	expansion := processArgs(args[1:])
 
-	fmt.Fprintf(out, "- Adding alias for %s = %s\n", utils.Bold(alias), utils.Bold(expansion))
+	fmt.Fprintf(out, "- Adding alias for %s: %s\n", utils.Bold(alias), utils.Bold(expansion))
 
 	if aliasCfg.Exists(alias) {
 		return fmt.Errorf("alias %s already exists", alias)
