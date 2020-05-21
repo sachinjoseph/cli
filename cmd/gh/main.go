@@ -13,6 +13,7 @@ import (
 	"github.com/cli/cli/internal/config"
 	"github.com/cli/cli/update"
 	"github.com/cli/cli/utils"
+	"github.com/google/shlex"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 )
@@ -29,10 +30,6 @@ func main() {
 
 	hasDebug := os.Getenv("DEBUG") != ""
 
-	fmt.Println("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-	fmt.Printf("%#v\n", os.Args)
-
-	// TODO rewrite aliases
 	ctx := command.InitContext()
 	cfg, err := ctx.Config()
 	if err != nil {
@@ -40,11 +37,18 @@ func main() {
 	}
 	aliases, err := cfg.Aliases()
 	if aliases.Exists(os.Args[1]) {
-		fmt.Println("HI I FOUND AN ALIAS OMGGGGGGGGG")
-		fmt.Printf("I WANNA EXPAND TO %s", aliases.Get(os.Args[1]))
-		// TODO just an exploratory hack:
-		args := []string{"pr", "status"}
-		command.RootCmd.SetArgs(args)
+		expansion := aliases.Get(os.Args[1])
+		if strings.Index(expansion, "$") > -1 {
+			for i, a := range os.Args[2:] {
+				expansion = strings.Replace(expansion, fmt.Sprintf("$%d", i+1), a, 1)
+			}
+		}
+		newArgs, err := shlex.Split(expansion)
+		if err != nil {
+			panic("ohhhhh noooooo")
+		}
+
+		command.RootCmd.SetArgs(newArgs)
 	}
 
 	if cmd, err := command.RootCmd.ExecuteC(); err != nil {

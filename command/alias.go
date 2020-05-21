@@ -20,11 +20,13 @@ var aliasCmd = &cobra.Command{
 }
 
 var aliasSetCmd = &cobra.Command{
-	Use:   "set",
-	Short: "Create a shortcut for a gh command",
-	Long:  `TODO`,
-	Args:  cobra.MinimumNArgs(2),
-	RunE:  aliasSet,
+	Use: "set",
+	// TODO HACK
+	DisableFlagParsing: true,
+	Short:              "Create a shortcut for a gh command",
+	Long:               `TODO`,
+	Args:               cobra.MinimumNArgs(2),
+	RunE:               aliasSet,
 }
 
 func aliasSet(cmd *cobra.Command, args []string) error {
