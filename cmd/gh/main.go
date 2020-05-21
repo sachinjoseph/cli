@@ -29,6 +29,24 @@ func main() {
 
 	hasDebug := os.Getenv("DEBUG") != ""
 
+	fmt.Println("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+	fmt.Printf("%#v\n", os.Args)
+
+	// TODO rewrite aliases
+	ctx := command.InitContext()
+	cfg, err := ctx.Config()
+	if err != nil {
+		panic("oh no")
+	}
+	aliases, err := cfg.Aliases()
+	if aliases.Exists(os.Args[1]) {
+		fmt.Println("HI I FOUND AN ALIAS OMGGGGGGGGG")
+		fmt.Printf("I WANNA EXPAND TO %s", aliases.Get(os.Args[1]))
+		// TODO just an exploratory hack:
+		args := []string{"pr", "status"}
+		command.RootCmd.SetArgs(args)
+	}
+
 	if cmd, err := command.RootCmd.ExecuteC(); err != nil {
 		printError(os.Stderr, err, cmd, hasDebug)
 		os.Exit(1)

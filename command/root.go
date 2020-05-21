@@ -103,6 +103,14 @@ var initContext = func() context.Context {
 	return ctx
 }
 
+var InitContext = func() context.Context {
+	ctx := context.New()
+	if repo := os.Getenv("GH_REPO"); repo != "" {
+		ctx.SetBaseRepo(repo)
+	}
+	return ctx
+}
+
 // BasicClient returns an API client that borrows from but does not depend on
 // user configuration
 func BasicClient() (*api.Client, error) {
