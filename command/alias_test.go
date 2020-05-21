@@ -1,8 +1,10 @@
 package command
 
 import (
+	"bytes"
 	"testing"
 
+	"github.com/cli/cli/internal/config"
 	"github.com/cli/cli/test"
 )
 
@@ -44,4 +46,64 @@ func TestAliasSet_arg_processing(t *testing.T) {
 
 		test.ExpectLines(t, output.String(), c.ExpectedLine)
 	}
+}
+
+func TestAliasSet_init_alias_cfg(t *testing.T) {
+	cfg := `---
+hosts:
+  github.com:
+    user: OWNER
+    oauth_token: token123
+`
+	initBlankContext(cfg, "OWNER/REPO", "trunk")
+
+	buf := bytes.NewBufferString("")
+	defer config.StubWriteConfig(buf)()
+
+	output, err := RunCommand("alias set cool story")
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	expected := `hosts:
+    github.com:
+        user: OWNER
+        oauth_token: token123
+aliases:
+    cool: story
+`
+
+	test.ExpectLines(t, output.String(), "Adding alias for cool = story", "Added alias.")
+	eq(t, buf.String(), expected)
+}
+
+func TestAliasSet_existing_aliases(t *testing.T) {
+	cfg := `---
+hosts:
+  github.com:
+    user: OWNER
+    oauth_token: token123
+aliases:
+    foo: bar
+`
+	initBlankContext(cfg, "OWNER/REPO", "trunk")
+
+	buf := bytes.NewBufferString("")
+	defer config.StubWriteConfig(buf)()
+
+	output, err := RunCommand("alias set cool story")
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	expected := `hosts:
+    github.com:
+        user: OWNER
+        oauth_token: token123
+aliases:
+    foo: bar
+    cool: story
+`
+
+	test.ExpectLines(t, output.String(), "Adding alias for cool = story", "Added alias.")
+	eq(t, buf.String(), expected)
+
 }
