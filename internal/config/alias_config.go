@@ -1,7 +1,14 @@
 package config
 
+import (
+	"fmt"
+
+	"gopkg.in/yaml.v3"
+)
+
 type AliasConfig struct {
 	ConfigMap
+	Parent Config
 }
 
 // TODO at what point should the alias top level be added? Lazily on first write, I think;
@@ -29,15 +36,29 @@ func (a *AliasConfig) Get(alias string) string {
 
 func (a *AliasConfig) Add(alias, expansion string) error {
 	if a.Root == nil {
-		// a.Root = initAliasConfig() // something like this?
-		// TODO create mapping node
-		// TODO initialize aliases key in config
+		// then we don't actually have an aliases stanza in the config yet.
+		keyNode := &yaml.Node{
+			Kind:  yaml.ScalarNode,
+			Value: "aliases",
+		}
+		valueNode := &yaml.Node{
+			Kind:  yaml.MappingNode,
+			Value: "",
+		}
+
+		a.Root = valueNode
+		a.Parent.Root().Content = append(a.Parent.Root().Content, keyNode, valueNode)
 	}
 
-	// TODO add k/v nodes
-	// TODO write config
+	err := a.SetStringValue(alias, expansion)
+	if err != nil {
+		return fmt.Errorf("failed to update config: %w", err)
+	}
 
-	// TODO how to do all of this without reference to parent?
+	err = a.Parent.Write()
+	if err != nil {
+		return fmt.Errorf("failed to write config: %w", err)
+	}
 
 	return nil
 }

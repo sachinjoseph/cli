@@ -60,7 +60,7 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not create alias: %s", err)
 	}
 
-	fmt.Fprintf(out, "%s Added alias.", utils.Green("✓"))
+	fmt.Fprintf(out, "%s Added alias.\n", utils.Green("✓"))
 
 	return nil
 }

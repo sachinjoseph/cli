@@ -12,6 +12,7 @@ const defaultGitProtocol = "https"
 
 // This interface describes interacting with some persistent configuration for gh.
 type Config interface {
+	Root() *yaml.Node
 	Hosts() ([]*HostConfig, error)
 	Get(string, string) (string, error)
 	Set(string, string, string) error
@@ -101,6 +102,10 @@ type fileConfig struct {
 	hosts        []*HostConfig
 }
 
+func (c *fileConfig) Root() *yaml.Node {
+	return c.ConfigMap.Root
+}
+
 func (c *fileConfig) Get(hostname, key string) (string, error) {
 	if hostname != "" {
 		hostCfg, err := c.configForHost(hostname)
@@ -177,7 +182,7 @@ func (c *fileConfig) Aliases() (*AliasConfig, error) {
 	var nfe *NotFoundError
 	if err != nil && errors.As(err, &nfe) {
 		// TODO does this make sense at all? want to simulate existing but empty key.
-		return &AliasConfig{}, nil
+		return &AliasConfig{Parent: c}, nil
 	}
 
 	aliasConfig, err := c.parseAliasConfig(aliasesEntry)
@@ -194,6 +199,7 @@ func (c *fileConfig) parseAliasConfig(aliasesEntry *yaml.Node) (*AliasConfig, er
 	}
 
 	aliasConfig := AliasConfig{
+		Parent:    c,
 		ConfigMap: ConfigMap{Root: aliasesEntry},
 	}
 
