@@ -30,6 +30,8 @@ aliases:
 
 func TestAliasSet_arg_processing(t *testing.T) {
 	initBlankContext("", "OWNER/REPO", "trunk")
+	buf := bytes.NewBufferString("")
+	defer config.StubWriteConfig(buf)()
 	cases := []struct {
 		Cmd          string
 		ExpectedLine string
