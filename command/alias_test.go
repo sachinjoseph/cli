@@ -36,8 +36,8 @@ func TestAliasSet_arg_processing(t *testing.T) {
 		Cmd          string
 		ExpectedLine string
 	}{
-		{"alias set co pr checkout", "- Adding alias for co = pr checkout"},
-		{`alias set il "issue list"`, "- Adding alias for il = issue list"},
+		{"alias set co pr checkout", "- Adding alias for co: pr checkout"},
+		{`alias set il "issue list"`, "- Adding alias for il: issue list"},
 	}
 
 	for _, c := range cases {
@@ -74,7 +74,7 @@ aliases:
     cool: story
 `
 
-	test.ExpectLines(t, output.String(), "Adding alias for cool = story", "Added alias.")
+	test.ExpectLines(t, output.String(), "Adding alias for cool: story", "Added alias.")
 	eq(t, buf.String(), expected)
 }
 
@@ -105,7 +105,7 @@ aliases:
     cool: story
 `
 
-	test.ExpectLines(t, output.String(), "Adding alias for cool = story", "Added alias.")
+	test.ExpectLines(t, output.String(), "Adding alias for cool: story", "Added alias.")
 	eq(t, buf.String(), expected)
 
 }
