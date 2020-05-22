@@ -21,7 +21,10 @@ var aliasCmd = &cobra.Command{
 
 var aliasSetCmd = &cobra.Command{
 	Use: "set",
-	// TODO HACK
+	// TODO HACK: even when inside of a single-quoted string, cobra was noticing and parsing any flags
+	// used in an alias expansion string argument. Since this command needs no flags, I disabled their
+	// parsing. If we ever want to add flags to alias set we'll have to figure this out. I haven't
+	// checked if this is fixed in a new cobra.
 	DisableFlagParsing: true,
 	Short:              "Create a shortcut for a gh command",
 	Long:               `TODO`,
@@ -42,11 +45,9 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 	}
 
 	alias := args[0]
-
-	out := colorableOut(cmd)
-
 	expansion := processArgs(args[1:])
 
+	out := colorableOut(cmd)
 	fmt.Fprintf(out, "- Adding alias for %s: %s\n", utils.Bold(alias), utils.Bold(expansion))
 
 	if aliasCfg.Exists(alias) {
@@ -68,7 +69,7 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 }
 
 func validCommand(expansion string) bool {
-	// TODO
+	// TODO root.traverse?
 	return true
 }
 

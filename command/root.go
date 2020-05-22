@@ -354,6 +354,8 @@ func determineEditor(cmd *cobra.Command) (string, error) {
 }
 
 func ExpandAlias(args []string) ([]string, error) {
+	// TODO i don't love that context is being init'd twice. My reading of the code is that it is
+	// idempotent and okay but I don't know if that's ok to depend on.
 	ctx := initContext()
 	cfg, err := ctx.Config()
 	if err != nil {
