@@ -13,6 +13,7 @@ import (
 	"github.com/cli/cli/internal/config"
 	"github.com/cli/cli/internal/ghrepo"
 	"github.com/cli/cli/utils"
+	"github.com/google/shlex"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -96,14 +97,6 @@ var versionCmd = &cobra.Command{
 
 // overridden in tests
 var initContext = func() context.Context {
-	ctx := context.New()
-	if repo := os.Getenv("GH_REPO"); repo != "" {
-		ctx.SetBaseRepo(repo)
-	}
-	return ctx
-}
-
-var InitContext = func() context.Context {
 	ctx := context.New()
 	if repo := os.Getenv("GH_REPO"); repo != "" {
 		ctx.SetBaseRepo(repo)
@@ -358,4 +351,28 @@ func determineEditor(cmd *cobra.Command) (string, error) {
 	}
 
 	return editorCommand, nil
+}
+
+func ExpandAlias(args []string) ([]string, error) {
+	ctx := initContext()
+	cfg, err := ctx.Config()
+	if err != nil {
+		return []string{}, err
+	}
+	aliases, err := cfg.Aliases()
+	if err != nil {
+		return []string{}, err
+	}
+
+	if aliases.Exists(args[1]) {
+		expansion := aliases.Get(args[1])
+		if strings.Contains(expansion, "$") {
+			for i, a := range args[2:] {
+				expansion = strings.Replace(expansion, fmt.Sprintf("$%d", i+1), a, 1)
+			}
+		}
+		return shlex.Split(expansion)
+	}
+
+	return args[1:], nil
 }

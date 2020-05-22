@@ -13,7 +13,6 @@ import (
 	"github.com/cli/cli/internal/config"
 	"github.com/cli/cli/update"
 	"github.com/cli/cli/utils"
-	"github.com/google/shlex"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 )
@@ -30,30 +29,15 @@ func main() {
 
 	hasDebug := os.Getenv("DEBUG") != ""
 
-	ctx := command.InitContext()
-	cfg, err := ctx.Config()
+	stderr := utils.NewColorable(os.Stderr)
+
+	expandedArgs, err := command.ExpandAlias(os.Args)
 	if err != nil {
-		panic("oh no")
-	}
-	aliases, err := cfg.Aliases()
-	if err != nil {
-		panic("ohh noo")
+		fmt.Fprintf(stderr, "failed to process aliases:  %s\n", err)
+		os.Exit(2)
 	}
 
-	if aliases.Exists(os.Args[1]) {
-		expansion := aliases.Get(os.Args[1])
-		if strings.Contains(expansion, "$") {
-			for i, a := range os.Args[2:] {
-				expansion = strings.Replace(expansion, fmt.Sprintf("$%d", i+1), a, 1)
-			}
-		}
-		newArgs, err := shlex.Split(expansion)
-		if err != nil {
-			panic("ohhhhh noooooo")
-		}
-
-		command.RootCmd.SetArgs(newArgs)
-	}
+	command.RootCmd.SetArgs(expandedArgs)
 
 	if cmd, err := command.RootCmd.ExecuteC(); err != nil {
 		printError(os.Stderr, err, cmd, hasDebug)
